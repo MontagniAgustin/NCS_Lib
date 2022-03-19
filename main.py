@@ -33,7 +33,8 @@ ncs_sig1 = ncs.ncs_dataset()
 ncs_sig1.set_Dataset(dataset=yp, timespace = tp)
 
 # Seteo de threshold para la segmentación
-ncs_sig1.set_SegmentationThreshold(ncs_sig1.dataset.max() * 0.06)
+ncs_sig1.set_SegmentationThreshold(ncs_sig1.dataset.max() * 0.06,
+                                    np.amax(np.diff(ncs_sig1.dataset)) * 0.11)
 
 # Computación de parámetros
 ncs_sig1.compute()

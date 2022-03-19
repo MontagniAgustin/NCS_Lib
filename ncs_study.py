@@ -53,8 +53,9 @@ class ncs_dataset():
     """
     Establece un Threshold para el calculo de la segmentación
     """
-    def set_SegmentationThreshold(self, thld):
-        self.segthld  = thld
+    def set_SegmentationThreshold(self, y_thld, d_thld):
+        self.segthld  = y_thld
+        self.dthld = d_thld
     
     ###################################################################
     #--- Getters
@@ -95,21 +96,20 @@ class ncs_dataset():
         self.x_max = self.max_values()
         self.x_min = self.min_values()
         self.x_slope = self.slopes()
-        self.x_segments, self.x_segm_mask = self.segmentation(15, self.segthld)
+        self.x_segments, self.x_segm_mask = self.segmentation(self.segthld, self.dthld)
         self.y_baselines = self.baselines()
 
     """
     Devuelve segmentos de la señal basado en un threshold sobre la 
     media de la señal
     """
-    def segmentation (self, x_thld, y_thld):
+    def segmentation (self, y_thld, d_thld):
         y_mean = np.mean(self.dataset)
         y_mean_band = [y_mean - y_thld, y_mean + y_thld]
 
-
         greater_thld = np.argwhere(self.dataset > y_mean)
         greater_band = np.argwhere(self.dataset > y_mean_band[1])
-        greater_deriv = np.argwhere(np.absolute(np.diff(self.dataset)) > np.amax(np.diff(self.dataset)) * 0.11)
+        greater_deriv = np.argwhere(np.absolute(np.diff(self.dataset)) > d_thld)
 
         greater = np.union1d(np.intersect1d(greater_thld,greater_deriv), greater_band)
         
