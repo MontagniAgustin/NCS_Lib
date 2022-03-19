@@ -95,23 +95,49 @@ class ncs_dataset():
         self.x_max = self.max_values()
         self.x_min = self.min_values()
         self.x_slope = self.slopes()
-        self.x_segments, self.x_segm_mask = self.segmentation(self.segthld)
+        self.x_segments, self.x_segm_mask = self.segmentation(15, self.segthld)
         self.y_baselines = self.baselines()
 
     """
     Devuelve segmentos de la señal basado en un threshold sobre la 
     media de la señal
     """
-    def segmentation (self, y_thld):
-        data_mean = np.mean(self.dataset)
-        y_mean_band = [data_mean - y_thld, data_mean + y_thld]
+    def segmentation (self, x_thld, y_thld):
+        y_mean = np.mean(self.dataset)
+        y_mean_band = [y_mean - y_thld, y_mean + y_thld]
+        y_deriv = 0
 
-        greater = np.argwhere(self.dataset > y_mean_band[1])
-        lower = np.argwhere(self.dataset < y_mean_band[0])
+        #greater = np.argwhere(self.dataset > y_mean_band[1])
+        #lower = np.argwhere(self.dataset < y_mean_band[0])
+
+        greater_thld = np.argwhere(self.dataset > y_mean)
+        greater_band = np.argwhere(self.dataset > y_mean_band[1])
+        greater_deriv = np.argwhere(np.absolute(np.diff(self.dataset)) > np.amax(np.diff(self.dataset)) * 0.11)
+
+        greater = np.union1d(np.intersect1d(greater_thld,greater_deriv), greater_band)
+        
+        lower_thld = np.argwhere(self.dataset < y_mean)
+        lower_band = np.argwhere(self.dataset < y_mean_band[0])
+        lower_deriv = np.argwhere(np.absolute(np.diff(self.dataset)) > np.amax(np.diff(self.dataset)) * 0.11)
+
+        lower = np.union1d(np.intersect1d(lower_thld, lower_deriv), lower_band)
 
         segment_mask = np.zeros(len(self.dataset))
         np.put(segment_mask, greater, 1)
         np.put(segment_mask, lower, -1)
+
+        #for index in range(len(segment_mask)):
+        #    #if index + x_thld < len(segment_mask):
+        #    window = segment_mask[index : index + x_thld]
+        #    if (window[0] != window[-1] and
+        #        window[0] != 0 and
+        #        window[-1] != 0):
+        #        great = np.argwhere(window > y_thld)
+        #        low = np.argwhere(window < y_thld)
+        #        np.put(segment_mask, great, 1)
+        #        np.put(segment_mask, low, -1)
+
+
 
         segments = np.where(np.diff(segment_mask))[0]
         
