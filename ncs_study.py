@@ -105,10 +105,7 @@ class ncs_dataset():
     def segmentation (self, x_thld, y_thld):
         y_mean = np.mean(self.dataset)
         y_mean_band = [y_mean - y_thld, y_mean + y_thld]
-        y_deriv = 0
 
-        #greater = np.argwhere(self.dataset > y_mean_band[1])
-        #lower = np.argwhere(self.dataset < y_mean_band[0])
 
         greater_thld = np.argwhere(self.dataset > y_mean)
         greater_band = np.argwhere(self.dataset > y_mean_band[1])
@@ -125,19 +122,6 @@ class ncs_dataset():
         segment_mask = np.zeros(len(self.dataset))
         np.put(segment_mask, greater, 1)
         np.put(segment_mask, lower, -1)
-
-        #for index in range(len(segment_mask)):
-        #    #if index + x_thld < len(segment_mask):
-        #    window = segment_mask[index : index + x_thld]
-        #    if (window[0] != window[-1] and
-        #        window[0] != 0 and
-        #        window[-1] != 0):
-        #        great = np.argwhere(window > y_thld)
-        #        low = np.argwhere(window < y_thld)
-        #        np.put(segment_mask, great, 1)
-        #        np.put(segment_mask, low, -1)
-
-
 
         segments = np.where(np.diff(segment_mask))[0]
         
