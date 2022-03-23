@@ -122,8 +122,8 @@ class ncs_dataset():
         self.x_mainsegment = self.mainsegment(self.segmentos)
         self.x_stimulus = self.stimulus(self.segmentos)
         self.t_onset_lat = self.onset_latency()
-        self.val_mainarea = self.mainarea()
-        self.v_area = self.mainarea()
+        self.val_mainarea, self.y_vmed = self.mainarea()
+        #self.v_area = self.mainarea()
         pass
         #
 
@@ -160,7 +160,9 @@ class ncs_dataset():
         np.put(segment_mask, lower, -1)
         np.put(segment_mask, greater, 1)
         
-        segments_active = np.where(np.diff(segment_mask) > 0)[0]
+        #segments_active = np.where(np.diff(segment_mask) > 0)[0]
+        condition = np.intersect1d( np.where(np.absolute(np.diff(segment_mask)) <=1) , np.where(np.absolute(np.diff(segment_mask)) > 0)) 
+        segments_active = condition#np.intersect1d( condition, np.where(segment_mask != 0))
         segments = np.where(np.diff(segment_mask))[0]
         
         segments_divided = np.split(range(len(self.dataset)),segments+1)
@@ -199,17 +201,24 @@ class ncs_dataset():
     segmento principal
     """
     def onset_latency (self):
-        if not np.isnan(self.x_stimulus):
+        if not np.isnan(self.x_stimulus.all()):
             t_lat = self.get_Duration(self.x_stimulus[-1], self.x_mainsegment[0])
         else:
             t_lat = self.get_Duration(0, self.x_mainsegment[0])
         return t_lat
 
     def mainarea (self):
-        if not np.isnan(self.x_stimulus):
-            amps = self.dataset[self.x_stimulus[-1] : self.x_mainsegment[0]]
-            v_med = np.mean(amps)
-            area = integ.simps(np.where(amps >= v_med))
+        if not np.isnan(self.x_stimulus.all()):
+            baseline = self.dataset[self.x_stimulus[-1] : self.x_mainsegment[0]]
+            v_med = np.mean(baseline)
+            amps = self.get_Amp(self.x_mainsegment)
+
+            segment = np.where(amps > v_med)
+            values = self.get_Amp(segment)
+
+            v_med_arr = np.full(len(segment), v_med)
+
+            area = integ.simps(values) - integ.simps(v_med_arr)
         else:
             baseline = self.dataset[0 : self.x_mainsegment[0]]
             v_med = np.mean(baseline)
@@ -222,9 +231,10 @@ class ncs_dataset():
 
             area = integ.simps(values) - integ.simps(v_med_arr)
             
+        self.v_med_arr=v_med_arr
         print("Area positiva")
         print(area)
-        return area
+        return area, v_med
 
         
 

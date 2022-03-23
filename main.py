@@ -12,6 +12,7 @@
 ##--- Imports --------------------------------------------------------------###
 import webplot_extractor as wp
 import matplotlib.pyplot as plt
+import matplotlib as mp
 import ncs_study as ncs
 import numpy as np
 
@@ -41,6 +42,35 @@ ncs_sig1.compute()
 
 ##--- Plot -----------------------------------------------------------------###
 
+fig, ax = plt.subplots()
+
+ax.set_title("Estudio de conducción nerviosa")
+ax.set_xlabel("Tiempo")
+ax.set_ylabel("Volts")
+ax.plot(tp,yp, label="Resampleada")
+
+#for i in ncs_sig1.segmentos:
+#    ta, ya = ncs_sig1.get_Time_Amp(i)
+#
+#    ax.plot(ta,ya, label="Resampleada")
+
+ta, ya = ncs_sig1.get_Time_Amp(ncs_sig1.x_segments[1])
+ax.plot(ta,ya, label="Resampleada")
+print("Latencia")
+print(ncs_sig1.t_onset_lat)
+
+#ax.axhline(ncs_sig1.y_vmed)
+
+
+#ta, ya = ncs_sig1.get_Time_Amp(ncs_sig1.x_mainsegment)
+#ax.plot(ta,ya, label="Resampleada")
+#ti, yi = ncs_sig1.get_Time_Amp(ncs_sig1.x_stimulus)
+#ax.plot(ti,yi)
+
+#ax.plot(tp,yp, label="Resampleada")
+#ax.plot(tp,ncs_sig1.x_segm_mask * 0.05, label="Mascara")
+
+"""
 fig, axs = plt.subplots(3, sharex=True, sharey=True)
 
 axs[0].plot(tp,yp)
@@ -63,5 +93,7 @@ print(ncs_sig1.t_onset_lat)
 #    axs[2].plot(ti, yi)
 
 #axs[2].axhline(ncs_sig1.y_baselines[1])
+"""
+
 
 plt.show()
